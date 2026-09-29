@@ -1,0 +1,28 @@
+war-crab-v2/
+├── war_crab_v2.py              # Main application (the file you provided)
+├── requirements.txt            # Python dependencies
+├── setup.py                    # Python package setup
+├── pyproject.toml              # Modern Python project config
+├── Dockerfile                  # Docker configuration
+├── docker-compose.yml          # Docker Compose setup
+├── .dockerignore               # Docker ignore file
+├── kubernetes/
+│   ├── deployment.yml          # Kubernetes deployment
+│   ├── service.yml             # Kubernetes service
+│   ├── configmap.yml           # ConfigMap for configuration
+│   ├── secret.yml              # Secrets (tokens, passwords)
+│   ├── pvc.yml                 # Persistent Volume Claim
+│   ├── ingress.yml             # Ingress configuration
+│   └── namespace.yml           # Namespace
+├── .gitlab-ci.yml              # GitLab CI/CD pipeline
+├── scripts/
+│   ├── setup.sh                # Bash setup script
+│   ├── setup.bat               # Windows batch setup
+│   ├── setup.ps1               # PowerShell setup
+│   ├── install_deps.sh         # Install system dependencies
+│   ├── start.sh                # Start script
+│   └── start.bat               # Windows start script
+├── .env.example                # Environment variables template
+├── .gitignore                  # Git ignore file
+├── LICENSE                     # License file
+└── README.md                   # Documentation

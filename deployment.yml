@@ -1,0 +1,286 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: war-crab-v2
+  namespace: war-crab
+  labels:
+    app: war-crab-v2
+    version: "2.0.0"
+    component: main
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: war-crab-v2
+      component: main
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: war-crab-v2
+        version: "2.0.0"
+        component: main
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: war-crab-sa
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: war-crab
+          image: war-crab-v2:2.0.0
+          imagePullPolicy: IfNotPresent
+          
+          ports:
+            - name: web
+              containerPort: 5000
+              protocol: TCP
+            - name: phishing
+              containerPort: 8080
+              protocol: TCP
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+            - name: c2
+              containerPort: 4444
+              protocol: TCP
+            - name: agent
+              containerPort: 9001
+              protocol: TCP
+          
+          envFrom:
+            - configMapRef:
+                name: war-crab-config
+            - secretRef:
+                name: war-crab-secrets
+          
+          volumeMounts:
+            - name: data
+              mountPath: /app/.war_crab_v2
+            - name: reports
+              mountPath: /app/war_crab_v2_reports
+            - name: logs
+              mountPath: /app/logs
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+              readOnly: true
+          
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+          
+          livenessProbe:
+            httpGet:
+              path: /api/stats
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          
+          readinessProbe:
+            httpGet:
+              path: /api/stats
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          
+          startupProbe:
+            httpGet:
+              path: /api/stats
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 30
+          
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW
+                - SYS_ADMIN
+              drop:
+                - ALL
+      
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: war-crab-data-pvc
+        - name: reports
+          persistentVolumeClaim:
+            claimName: war-crab-reports-pvc
+        - name: logs
+          persistentVolumeClaim:
+            claimName: war-crab-logs-pvc
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
+      
+      nodeSelector:
+        kubernetes.io/os: linux
+      
+      tolerations:
+        - key: "security"
+          operator: "Equal"
+          value: "high"
+          effect: "NoSchedule"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: war-crab-postgres
+  namespace: war-crab
+  labels:
+    app: war-crab-postgres
+    component: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: war-crab-postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: war-crab-postgres
+        component: database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: war-crab-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: war-crab-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: "warcrab"
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - warcrab
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - warcrab
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-data-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: war-crab-redis
+  namespace: war-crab
+  labels:
+    app: war-crab-redis
+    component: cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: war-crab-redis
+  template:
+    metadata:
+      labels:
+        app: war-crab-redis
+        component: cache
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+              name: redis
+          command:
+            - redis-server
+            - --appendonly
+            - "yes"
+            - --appendfsync
+            - everysec
+            - --maxmemory
+            - 512mb
+            - --maxmemory-policy
+            - allkeys-lru
+            - --requirepass
+            - $(REDIS_PASSWORD)
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: war-crab-secrets
+                  key: REDIS_PASSWORD
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - redis-cli
+                - ping
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-data-pvc

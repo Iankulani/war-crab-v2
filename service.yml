@@ -1,0 +1,134 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: war-crab-web
+  namespace: war-crab
+  labels:
+    app: war-crab-v2
+    component: web
+spec:
+  type: ClusterIP
+  selector:
+    app: war-crab-v2
+    component: main
+  ports:
+    - name: web
+      port: 5000
+      targetPort: 5000
+      protocol: TCP
+    - name: phishing
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+    - name: https
+      port: 8443
+      targetPort: 8443
+      protocol: TCP
+    - name: c2
+      port: 4444
+      targetPort: 4444
+      protocol: TCP
+    - name: agent
+      port: 9001
+      targetPort: 9001
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: war-crab-web-lb
+  namespace: war-crab
+  labels:
+    app: war-crab-v2
+    component: web-lb
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+spec:
+  type: LoadBalancer
+  selector:
+    app: war-crab-v2
+    component: main
+  ports:
+    - name: web
+      port: 80
+      targetPort: 5000
+      protocol: TCP
+    - name: web-https
+      port: 443
+      targetPort: 5000
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: war-crab
+  labels:
+    app: war-crab-postgres
+spec:
+  type: ClusterIP
+  selector:
+    app: war-crab-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: war-crab
+  labels:
+    app: war-crab-redis
+spec:
+  type: ClusterIP
+  selector:
+    app: war-crab-redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+      protocol: TCP
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: war-crab-sa
+  namespace: war-crab
+  labels:
+    app: war-crab-v2
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: war-crab-role
+  labels:
+    app: war-crab-v2
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints", "configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: war-crab-rolebinding
+  labels:
+    app: war-crab-v2
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: war-crab-role
+subjects:
+  - kind: ServiceAccount
+    name: war-crab-sa
+    namespace: war-crab

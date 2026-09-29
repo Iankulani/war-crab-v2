@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: war-crab-config
+  namespace: war-crab
+  labels:
+    app: war-crab-v2
+data:
+  # Application Configuration
+  WARCRAB_LOG_LEVEL: "INFO"
+  WARCRAB_HOME: "/app"
+  WARCRAB_CONFIG: "/app/.war_crab_v2"
+  
+  # Web Dashboard
+  WARCRAB_WEB_PORT: "5000"
+  WARCRAB_WEB_HOST: "0.0.0.0"
+  WARCRAB_WEB_ENABLED: "true"
+  
+  # Phishing Server
+  WARCRAB_PHISH_PORT: "8080"
+  WARCRAB_PHISH_ENABLED: "true"
+  
+  # C2 Server
+  WARCRAB_C2_PORT: "4444"
+  WARCRAB_C2_ENABLED: "true"
+  
+  # Agent Communication
+  WARCRAB_AGENT_PORT: "9001"
+  WARCRAB_AGENT_ENABLED: "true"
+  
+  # Monitoring
+  WARCRAB_MONITORING_ENABLED: "true"
+  WARCRAB_MONITORING_INTERVAL: "30"
+  
+  # Database
+  POSTGRES_HOST: "postgres"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "warcrab"
+  
+  # Redis
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  
+  # Network Monitor
+  WARCRAB_NETMON_INTERFACE: "eth0"
+  WARCRAB_NETMON_PROMISCUOUS: "false"
+  WARCRAB_NETMON_CAPTURE_LIMIT: "1000"
+  
+  # Keylogger
+  WARCRAB_KEYLOGGER_ENABLED: "false"
+  WARCRAB_KEYLOGGER_SCREENSHOT_INTERVAL: "60"
+  WARCRAB_KEYLOGGER_UPLOAD_INTERVAL: "30"
+  
+  # Domain Hosting
+  WARCRAB_DOMAIN_HOSTING_ENABLED: "true"
+  WARCRAB_DOMAIN_DEFAULT_PORT: "8080"
+  
+  # Traffic Generation
+  WARCRAB_TRAFFIC_MAX_DURATION: "300"
+  WARCRAB_TRAFFIC_MAX_PACKET_RATE: "1000"
+  WARCRAB_TRAFFIC_ALLOW_FLOODS: "false"
+  
+  # DOS Protection
+  WARCRAB_DOS_MAX_THREADS: "100"
+  WARCRAB_DOS_DEFAULT_TIMEOUT: "60"
+  
+  # SSH
+  WARCRAB_SSH_TIMEOUT: "30"
+  WARCRAB_SSH_MAX_CONNECTIONS: "5"
+  
+  # Cracking
+  WARCRAB_CRACKING_HASHCAT_PATH: "/usr/bin/hashcat"
+  WARCRAB_CRACKING_WORDLIST_PATH: "/usr/share/wordlists/rockyou.txt"
+  WARCRAB_CRACKING_MAX_THREADS: "4"
+  
+  # Docker
+  WARCRAB_DOCKER_SCAN_TIMEOUT: "300"
+  WARCRAB_DOCKER_BENCHMARK_ENABLED: "true"
+  
+  # Reverse Engineering
+  WARCRAB_RE_GHIDRA_PATH: "/opt/ghidra"
+  WARCRAB_RE_RADARE2_PATH: "/usr/bin/r2"
+  WARCRAB_RE_OBJDUMP_PATH: "/usr/bin/objdump"

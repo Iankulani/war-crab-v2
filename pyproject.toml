@@ -1,0 +1,163 @@
+[build-system]
+requires = ["setuptools>=68.0.0", "wheel>=0.41.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "war-crab-v2"
+version = "2.0.0"
+description = "Ultimate Cybersecurity Command & Control Platform"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+    { name = "Ian Carter Kulani", email = "war-crab@example.com" }
+]
+keywords = [
+    "security", "cybersecurity", "penetration-testing",
+    "network-monitoring", "keylogger", "phishing",
+    "command-and-control", "c2", "botnet", "red-team"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security",
+    "Topic :: System :: Networking :: Monitoring",
+]
+
+dependencies = [
+    "requests>=2.31.0",
+    "psutil>=5.9.5",
+    "cryptography>=41.0.0",
+    "scapy>=2.5.0",
+    "dnspython>=2.4.0",
+    "paramiko>=3.3.0",
+    "Flask>=2.3.0",
+    "Flask-SocketIO>=5.3.0",
+    "Flask-CORS>=4.0.0",
+    "discord.py>=2.3.0",
+    "python-telegram-bot>=20.0",
+    "telethon>=1.29.0",
+    "slack-sdk>=3.23.0",
+    "qrcode>=7.4.2",
+    "Pillow>=10.0.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "pynput>=1.7.6",
+    "pyautogui>=0.9.54",
+    "python-dotenv>=1.0.0",
+    "rich>=13.5.0",
+    "colorama>=0.4.6",
+    "pyfiglet>=0.8.post1",
+    "termcolor>=2.3.0",
+    "pyyaml>=6.0",
+    "loguru>=0.7.0",
+    "docker>=6.1.0",
+    "kubernetes>=27.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.7.0",
+    "flake8>=6.1.0",
+    "mypy>=1.5.0",
+    "isort>=5.12.0",
+    "pylint>=2.17.0",
+]
+docs = [
+    "sphinx>=7.1.0",
+    "sphinx-rtd-theme>=1.3.0",
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.2.0",
+]
+bots = [
+    "discord.py>=2.3.0",
+    "python-telegram-bot>=20.0",
+    "telethon>=1.29.0",
+    "slack-sdk>=3.23.0",
+]
+web = [
+    "Flask>=2.3.0",
+    "Flask-SocketIO>=5.3.0",
+    "Flask-CORS>=4.0.0",
+]
+security = [
+    "scapy>=2.5.0",
+    "cryptography>=41.0.0",
+    "paramiko>=3.3.0",
+    "pynput>=1.7.6",
+]
+
+[project.scripts]
+war-crab = "war_crab_v2:main"
+warcrab = "war_crab_v2:main"
+
+[project.urls]
+Homepage = "https://github.com/iancarter/war-crab-v2"
+Documentation = "https://war-crab-v2.readthedocs.io"
+Repository = "https://github.com/iancarter/war-crab-v2"
+Issues = "https://github.com/iancarter/war-crab-v2/issues"
+
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["war_crab_v2"]
+omit = ["*/tests/*", "*/test_*.py"]
+
+[tool.pylint]
+max-line-length = 100
+disable = [
+    "C0114",  # missing-module-docstring
+    "C0115",  # missing-class-docstring
+    "C0116",  # missing-function-docstring
+    "R0913",  # too-many-arguments
+    "R0914",  # too-many-locals
+    "W0703",  # broad-except
+]
