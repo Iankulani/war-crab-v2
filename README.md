@@ -52,15 +52,19 @@ kubectl logs -f deployment/war-crab-v2 -n war-crab
 ```
 # Windows Setup
 
+```bash
 REM Run setup
 scripts\setup.bat
+```
 
-REM Start
+# REM Start
+```bash
 scripts\start.bat
-powershell
-# PowerShell setup
+```
+# powershell
+```bash
 .\scripts\setup.ps1
-
+```
 # Start
 ```bash
 .\scripts\start.ps1
